@@ -13,6 +13,7 @@ class Downloader(DownloadUtilBase):
     def download(self):
 
         task_data_path = os.path.join(self.download_dir, "chen_2014")
+        os.makedirs(task_data_path, exist_ok = True)
         # from https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=3323&context=sis_research
         # AR-Miner: Mining Informative Reviews for Developers from Mobile App Marketplace
         r = requests.get("https://sites.google.com/site/appsuserreviews/home/datasets.zip?attredirects=0&d=1")

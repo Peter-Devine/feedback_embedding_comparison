@@ -39,7 +39,7 @@ class Downloader(DownloadUtilBase):
             app_df = df[df.app == app_name]
 
             # Drop all columns except text and label
-            app_df = app_df.loc(:, ["text", "label"])
+            app_df = app_df.loc[:, ["text", "label"]]
 
             df_dict[app_name] = app_df
 

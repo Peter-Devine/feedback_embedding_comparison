@@ -15,6 +15,9 @@ class Downloader(DownloadUtilBase):
     def download(self):
 
         task_data_path = os.path.join(self.download_dir, "di_sorbo_2017")
+
+        os.makedirs(task_data_path, exist_ok = True)
+
         # from https://www.merlin.uzh.ch/contributionDocument/download/9373
         # What Would Users Change in My App? Summarizing App Reviews for Recommending Software Changes
         r = requests.get("https://zenodo.org/record/47323/files/SURF-SURF-v.1.0.zip?download=1")
@@ -24,7 +27,7 @@ class Downloader(DownloadUtilBase):
         file_dir = os.path.join(task_data_path, "panichella-SURF-29332ec", "SURF_replication_package", "Experiment I", "summaries")
 
         # We read the html file provided for each app, and download both the text and label for each observation
-        def add_data_to_df(data, app_name):
+        def add_data_to_df(data):
             soup = BeautifulSoup(data, 'html.parser')
 
             label_upper_element = [x for x in soup.find_all("sup")]
@@ -43,7 +46,7 @@ class Downloader(DownloadUtilBase):
                 # We cut off the .html from the file name so that we are left with the app name
                 app_name = file_name[:-5]
 
-                df_dict[file_name] = add_data_to_df(data, file_name)
+                df_dict[app_name] = add_data_to_df(data)
 
         shutil.rmtree(task_data_path)
 

@@ -13,6 +13,7 @@ class Downloader(DownloadUtilBase):
     def download(self):
 
         task_data_path = os.path.join(self.download_dir, "tizard_2019")
+        os.makedirs(task_data_path, exist_ok = True)
 
         r = requests.get("https://zenodo.org/record/3340156/files/RE_Submission_17-master.zip?download=1")
         z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -95,7 +96,7 @@ class Downloader(DownloadUtilBase):
             app_df = df[df.app == app_name]
 
             # Drop all columns except text and label
-            app_df = app_df.loc(:, ["text", "label"])
+            app_df = app_df.loc[:, ["text", "label"]]
 
             df_dict[app_name] = app_df
 

@@ -14,6 +14,7 @@ from data.download_util_base import DownloadUtilBase
 class Downloader(DownloadUtilBase):
     def download(self):
         task_data_path = os.path.join(self.download_dir, "williams_2017")
+        os.makedirs(task_data_path, exist_ok = True)
         # from
         # Mining Twitter feeds for software user requirements.
         r = requests.get("http://seel.cse.lsu.edu/data/re17.zip")
@@ -81,7 +82,7 @@ class Downloader(DownloadUtilBase):
             app_df = df[df.app == app_name]
 
             # Drop all columns except text and label
-            app_df = app_df.loc(:, ["text", "label"])
+            app_df = app_df.loc[:, ["text", "label"]]
 
             df_dict[app_name] = app_df
 
