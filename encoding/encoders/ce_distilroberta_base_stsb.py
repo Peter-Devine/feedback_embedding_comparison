@@ -2,5 +2,5 @@ from encoding.sentence_transformers_encoder_base import SentenceTransformerEncod
 
 class Encoder(SentenceTransformerEncoderBase):
     def __init__(self):
-        model_name = "ce-distilroberta-base-stsb"
+        model_name = "sentence-transformers/ce-distilroberta-base-stsb"
         super(Encoder, self).__init__(model_name)

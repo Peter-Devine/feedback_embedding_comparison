@@ -28,7 +28,14 @@ def get_metrics(list_of_metrics):
             metric_dict[dataset_encodings_folder] = {}
 
         datset_encodings_dir = os.path.join(encodings_dir, dataset_encodings_folder)
-        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:]]
+        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:] == ".csv"]
+
+        # Labels are the same across encodings, so we only read it once.
+        # Get the labels column and parse the list of labels from string
+        labels = get_labels(os.path.join(datset_encodings_dir, dataset_encodings[0]))
+
+        # We prepare the metric objects so that we do not repeat label handling multiple times
+        metric_objects_dict = prepare_metric_objects(list_of_metrics, labels)
 
         for encoding_file in dataset_encodings:
 
@@ -36,14 +43,11 @@ def get_metrics(list_of_metrics):
             encoding_dir = os.path.join(datset_encodings_dir, encoding_file)
             encoding_df = pd.read_csv(encoding_dir, index_col = 0)
 
-            # Get the labels column and parse the list of labels from string
-            labels = encoding_df["labels"].apply(lambda x: x[1:-1].split(','))
-
             # Get encodings values
             encodings = encoding_df.drop("labels", axis=1).values
 
             print(f"Calculating metrics on {encoding_file} encoding of {dataset_encodings_folder}")
-            metrics_dict = calculate_metrics_of_encoding(encodings, labels, list_of_metrics)
+            metrics_dict = calculate_metrics_of_encoding(encodings, labels, metric_objects_dict)
 
             # So the results should be saved as {"metric_name": {"dataset_name": {"encoding_name": metric_val}}}
             for metric_name, metric_val in metrics_dict.items():
@@ -55,17 +59,30 @@ def get_metrics(list_of_metrics):
         results_dir = os.path.join(RESULTS_DIR, f"{metric_name}.csv")
         pd.DataFrame(metric_results_dict).to_csv(results_dir)
 
+def get_labels(encoding_path):
+    encoding_df = pd.read_csv(encoding_path, index_col = 0)
+    return encoding_df["labels"].apply(lambda x: x[1:-1].split(','))
 
-def calculate_metrics_of_encoding(encodings, labels, list_of_metrics):
-
-    metrics_dict = {}
+def prepare_metric_objects(list_of_metrics, labels):
+    metric_obj_dict = {}
 
     for metric_name in list_of_metrics:
         metric_module = importlib.import_module(f"analysis.metrics.{metric_name}")
 
-        print(f"Calculating {metric_name} metric")
-        metric_val = metric_module.calculate(encodings, labels)
+        print(f"Loading {metric_name} metric")
+        metric_obj = metric_module.Metric(labels)
+        # If the metric is appliable to this label set
+        if metric_obj.is_possible:
+            metric_obj_dict[metric_name] = metric_obj
 
+    return metric_obj_dict
+
+def calculate_metrics_of_encoding(encodings, labels, metric_objects_dict):
+
+    metrics_dict = {}
+
+    for metric_name, metric_obj in metric_objects_dict.items():
+        metric_val = metric_obj.calculate(encodings)
         metrics_dict[metric_name] = metric_val
 
     return metrics_dict

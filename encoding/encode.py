@@ -23,7 +23,7 @@ def get_encodings(list_of_encoders):
         for dataset in list_of_datasets:
             dataset_dir = os.path.join(data_folder_dir, dataset)
             data_df = pd.read_csv(dataset_dir, index_col=0)
-            dataset_dict[dataset] = data_df
+            dataset_dict[dataset[:-4]] = data_df
         return dataset_dict
 
     # Save the encoding with a column for labels in the ./data/encoding/dataset_name/encoding_name.csv path
