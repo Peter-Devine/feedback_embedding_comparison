@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import importlib
 
-def get_metrics(list_of_metrics):
+def get_metrics(list_of_metrics, list_of_encodings=[]):
 
     if len(list_of_metrics) < 1:
         # If we have passed an empty list to the metric analyser, then we will calculate all metrics
@@ -13,22 +13,17 @@ def get_metrics(list_of_metrics):
 
     encodings_dir = os.path.join(".", "data", "encoding")
 
-    results_dict = {}
-
-    # Make an empty dict for each metric name to save dataset > encoding in it
-    for metric_name in list_of_metrics:
-        results_dict[metric_name] = {}
+    individual_results_dir = os.path.join("data", "metrics")
+    os.makedirs(individual_results_dir, exist_ok = True)
 
     # Since the encodings are located in ./data/encoding/DATASET_NAME/ENCODING_NAME.csv
     # we iterate over one folder then the other.
     for dataset_encodings_folder in os.listdir(encodings_dir):
 
-        # Make an empty dict for each dataset in metric dict
-        for metric_name, metric_dict in results_dict.items():
-            metric_dict[dataset_encodings_folder] = {}
+        os.makedirs(os.path.join(individual_results_dir, dataset_encodings_folder), exist_ok = True)
 
         datset_encodings_dir = os.path.join(encodings_dir, dataset_encodings_folder)
-        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:] == ".csv"]
+        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:] == ".csv" and (file[:-4] in list_of_encodings or len(list_of_encodings) < 1)]
 
         # Labels are the same across encodings, so we only read it once.
         # Get the labels column and parse the list of labels from string
@@ -49,9 +44,32 @@ def get_metrics(list_of_metrics):
             print(f"Calculating metrics on {encoding_file} encoding of {dataset_encodings_folder}")
             metrics_dict = calculate_metrics_of_encoding(encodings, labels, metric_objects_dict)
 
-            # So the results should be saved as {"metric_name": {"dataset_name": {"encoding_name": metric_val}}}
-            for metric_name, metric_val in metrics_dict.items():
-                results_dict[metric_name][dataset_encodings_folder][encoding_file] = metric_val
+            pd.DataFrame(metrics_dict, index=[0]).to_csv(os.path.join(individual_results_dir, dataset_encodings_folder, encoding_file))
+
+
+    results_dict = {}
+
+    # Make an empty dict for each metric name to save dataset > encoding in it
+    for metric_name in list_of_metrics:
+        results_dict[metric_name] = {}
+
+    for dataset_encodings_folder in os.listdir(individual_results_dir):
+        for metric_name in list_of_metrics:
+            results_dict[metric_name][dataset_encodings_folder] = {}
+
+        dataset_encodings_path = os.path.join(individual_results_dir, dataset_encodings_folder)
+
+        for encoding_file in os.listdir(dataset_encodings_path):
+            encoding_metric_path = os.path.join(dataset_encodings_path, encoding_file)
+            metric_df = pd.read_csv(encoding_metric_path, index_col=0)
+
+            assert metric_df.shape[0] == 1, f"metric_df at {encoding_metric_path} should only have 1 row, and have metrics as columns (I.e. of shape (1, n_metrics)). Instead, df is of shape {metric_df.shape}"
+
+            for metric in list_of_metrics:
+                assert metric in metric_df.columns, f"{metric} given to calculate, but {metric_df.columns} metrics exist in the results file."
+
+                metric_val = metric_df[metric].iloc[0]
+                results_dict[metric][dataset_encodings_folder][encoding_file[:-4]] = metric_val
 
     RESULTS_DIR = os.path.join(".", "results")
     os.makedirs(RESULTS_DIR, exist_ok = True)
@@ -71,9 +89,7 @@ def prepare_metric_objects(list_of_metrics, labels):
 
         print(f"Loading {metric_name} metric")
         metric_obj = metric_module.Metric(labels)
-        # If the metric is appliable to this label set
-        if metric_obj.is_possible:
-            metric_obj_dict[metric_name] = metric_obj
+        metric_obj_dict[metric_name] = metric_obj
 
     return metric_obj_dict
 

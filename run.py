@@ -11,6 +11,7 @@ parser.add_argument('--encoding_list', default="", required=False, type=str, hel
 parser.add_argument('--encode_all', type=bool, nargs='?', const=True, default=False, help="Encode using all encoders available?")
 parser.add_argument('--metric_list', default="", required=False, type=str, help="Comma separated list of metrics to analyse encodings with.")
 parser.add_argument('--calculate_all_metrics', type=bool, nargs='?', const=True, default=False, help="Analyse using all metrics available?")
+parser.add_argument('--eval_encoding_name', default="", required=False, type=str, help="Which encodings should we calculate metrics for? If blank, defaults to all currently generated encodings.")
 # parser.add_argument('--LR', default=5e-5, type=int, help='Learning rate for the model')
 
 args = parser.parse_args()
@@ -26,4 +27,5 @@ if len(args.encoding_list) > 0 or args.encode_all:
 
 if len(args.metric_list) > 0 or args.calculate_all_metrics:
     metric_list = [] if args.calculate_all_metrics else args.metric_list.split(",")
-    get_metrics(metric_list)
+    eval_encoding_list = [] if len(args.eval_encoding_name) < 1 else args.eval_encoding_name.split(",")
+    get_metrics(metric_list, eval_encoding_list)

@@ -29,7 +29,7 @@ class DownloadUtilBase:
             df = pd.DataFrame({"text": grouped_df.index, "labels": grouped_df.values})
 
             # If there are less than 10 data points within a subset, then we skip this dataset (too small to be useful).
-            if df.shape[0] < MIN_DATA_SIZE:
+            if df.shape[0] < MIN_DATA_SIZE or len(df["labels"].unique()) < 2:
                 continue
 
             df.to_csv(os.path.join(self.download_dir, f"{self.dataset_name}_{subset_name}.csv"))

@@ -46,7 +46,7 @@ def get_encodings(list_of_encoders):
 
         for dataset_name, dataset_df in dataset_dict.items():
             print(f"Now encoding {dataset_name} using {encoder_name}")
-            encoding = encoder.encode(list(dataset_df.text))
+            encoding = encoder.encode(list(dataset_df.text), dataset_name=dataset_name)
             save_encoding(dataset_name, encoder_name, encoding, list(dataset_df.labels))
 
     for encoder_name in list_of_encoders:
