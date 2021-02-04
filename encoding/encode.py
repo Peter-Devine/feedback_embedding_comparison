@@ -1,6 +1,7 @@
 import os
 import importlib
 import pandas as pd
+import numpy as np
 
 def get_encodings(list_of_encoders):
 
@@ -30,11 +31,13 @@ def get_encodings(list_of_encoders):
     def save_encoding(dataset_name, encoder_name, encoding, labels):
         dataset_encoding_file_path = os.path.join(ENCODING_DIR, f"{dataset_name}")
         os.makedirs(dataset_encoding_file_path, exist_ok = True)
-        encoding_file_path = os.path.join(dataset_encoding_file_path, f"{encoder_name}.csv")
+        encoding_file_path = os.path.join(dataset_encoding_file_path, f"{encoder_name}.npy")
 
         df = pd.DataFrame(encoding)
         df["labels"] = labels
-        df.to_csv(encoding_file_path)
+
+        with open(encoding_file_path, "wb") as f:
+            np.save(f, df.values)
 
     # Get one encoding type for all datasets currently downloaded
     def get_single_encoding_type(encoder_name):

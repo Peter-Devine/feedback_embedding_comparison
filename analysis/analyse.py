@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 import importlib
+import numpy as np
+
 
 def get_metrics(list_of_metrics, list_of_encodings=[]):
 
@@ -16,14 +18,13 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
     individual_results_dir = os.path.join("data", "metrics")
     os.makedirs(individual_results_dir, exist_ok = True)
 
-    # Since the encodings are located in ./data/encoding/DATASET_NAME/ENCODING_NAME.csv
+    # Since the encodings are located in ./data/encoding/DATASET_NAME/ENCODING_NAME.npy
     # we iterate over one folder then the other.
     for dataset_encodings_folder in os.listdir(encodings_dir):
-
         os.makedirs(os.path.join(individual_results_dir, dataset_encodings_folder), exist_ok = True)
 
         datset_encodings_dir = os.path.join(encodings_dir, dataset_encodings_folder)
-        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:] == ".csv" and (file[:-4] in list_of_encodings or len(list_of_encodings) < 1)]
+        dataset_encodings = [file for file in os.listdir(datset_encodings_dir) if file[-4:] == ".npy" and (file[:-4] in list_of_encodings or len(list_of_encodings) < 1)]
 
         # Labels are the same across encodings, so we only read it once.
         # Get the labels column and parse the list of labels from string
@@ -34,12 +35,11 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
 
         for encoding_file in dataset_encodings:
 
-            # Load the encoding .csv
+            # Load the encoding .npy
             encoding_dir = os.path.join(datset_encodings_dir, encoding_file)
-            encoding_df = pd.read_csv(encoding_dir, index_col = 0)
-
-            # Get encodings values
-            encodings = encoding_df.drop("labels", axis=1).values
+            with open(encoding_dir, 'rb') as f:
+                # We load the encoding numpy and leave out the last column (labels)
+                encodings = np.load(f, allow_pickle=True)[:,:-1]
 
             print(f"Calculating metrics on {encoding_file} encoding of {dataset_encodings_folder}")
             metrics_dict = calculate_metrics_of_encoding(encodings, labels, metric_objects_dict)
@@ -78,8 +78,16 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
         pd.DataFrame(metric_results_dict).to_csv(results_dir)
 
 def get_labels(encoding_path):
-    encoding_df = pd.read_csv(encoding_path, index_col = 0)
-    return encoding_df["labels"].apply(lambda x: x[1:-1].split(','))
+    with open(encoding_path, 'rb') as f:
+        encoding_and_labels = np.load(f, allow_pickle=True)
+    labels = encoding_and_labels[:,-1]
+
+    def split_labels_fn(label_str):
+        label_list = label_str[1:-1].replace("'", "").split(',')
+        return [label.strip() for label in label_list]
+
+    split_labels = pd.Series([split_labels_fn(label_str) for label_str in labels])
+    return split_labels
 
 def prepare_metric_objects(list_of_metrics, labels):
     metric_obj_dict = {}
