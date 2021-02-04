@@ -27,9 +27,11 @@ class DownloadUtilBase:
             # In case any rows of text are repeated (I.e. have multiple labels) we add them all together here into one list
             grouped_df = df.groupby("text").label.apply(list)
             df = pd.DataFrame({"text": grouped_df.index, "labels": grouped_df.values})
+            df["labels"] = df["labels"].apply(lambda x: list(set(x)))
 
             # If there are less than 10 data points within a subset, then we skip this dataset (too small to be useful).
-            if df.shape[0] < MIN_DATA_SIZE or len(df["labels"].unique()) < 2:
+            # If this dataset contains less than 2 labels, we also skip.
+            if df.shape[0] < MIN_DATA_SIZE or len(df["labels"].explode().unique()) < 2:
                 continue
 
             df.to_csv(os.path.join(self.download_dir, f"{self.dataset_name}_{subset_name}.csv"))

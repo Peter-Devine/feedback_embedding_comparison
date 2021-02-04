@@ -40,6 +40,17 @@ class Downloader(DownloadUtilBase):
             train = train_info.append(train_noninfo).reset_index(drop=True)
             test = test_info.append(test_noninfo).reset_index(drop=True)
 
+            ## Handles a bug in 3 of the datasets where a piece of feedback is labelled as both informative and non-informative
+            bad_texts = ["Frustrating since I had to delete all of the learned suggestions, but it's back so I'm happy.",
+                        "cute game but have to play it every day or fish will die of starvation",
+                        "give more fish bucks and lower prices, but it was awsome",
+                        "now ive lot all my prizes that's again tap fish, you're getting deleted finally",
+                        "why is tapfish disabled",
+                        "but when are you guys gonna have better graphics its 2013",
+                        "excellent game but new upgrade 3d version or hd version"]
+            train = train.loc[~train.text.isin(bad_texts),:]
+            test = test.loc[~test.text.isin(bad_texts),:]
+
             return train, test
 
         def append_df(df1, df2):
