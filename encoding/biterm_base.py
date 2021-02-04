@@ -23,7 +23,7 @@ class BitermBase:
         btm = oBTM(num_topics=self.topic_num, V=vocab)
 
         # Run biterm topic modelling
-        topic_distribution = btm.fit_transform(biterms, iterations=20)
+        topic_distribution = btm.fit_transform(biterms, iterations=50)
 
         # If there is a div(0) error, then the whole encoding is nan. We then simply say that there is an equally likely chance that this piece of text is part of any topic
         topic_distribution[np.isnan(topic_distribution).any(axis=1)] = 1 / self.topic_num
