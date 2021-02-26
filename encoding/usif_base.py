@@ -1,5 +1,4 @@
 # This code has been taken from https://github.com/kawine/usif
-
 import re
 import os
 import numpy as np
@@ -10,7 +9,6 @@ from scipy.linalg import svd
 from nltk import word_tokenize
 import sys
 from functools import reduce
-
 
 class word2prob(object):
 	"""Map words to their probabilities."""
@@ -72,8 +70,6 @@ class word2vec(object):
 
 	def __contains__(self, w):
 		return w in self.vectors
-
-
 
 class uSIF(object):
 	"""Embed sentences using unsupervised smoothed inverse frequency."""
@@ -154,74 +150,6 @@ class uSIF(object):
 			vectors = [ v_s - lambda_i * proj(v_s, pc) for v_s in vectors ]
 
 		return vectors
-
-
-def test_STS(model):
-	"""Test the performance on the STS tasks and print out the results.
-	Expected results:
-		STS2012: 0.683
-		STS2013: 0.661
-		STS2014: 0.784
-		STS2015: 0.790
-		SICK2014: 0.735
-		STSBenchmark: 0.795
-	Args:
-		model: a uSIF object
-	"""
-	test_dirs = [
-		'STS/STS-data/STS2012-gold/',
-		'STS/STS-data/STS2013-gold/',
-		'STS/STS-data/STS2014-gold/',
-		'STS/STS-data/STS2015-gold/',
-		'STS/SICK-data/',
-		'STSBenchmark/'
-	]
-
-	for td in test_dirs:
-		test_fns = filter(lambda fn: '.input.' in fn and fn.endswith('txt'), os.listdir(td))
-		scores = []
-
-		for fn in test_fns:
-			sentences = re.split(r'\t|\n', open(td + fn).read().strip())
-			vectors = model.embed(sentences)
-			y_hat = [ 1 - cosine(vectors[i], vectors[i+1]) for i in range(0, len(vectors), 2) ]
-			y = list(map(float, open(td + fn.replace('input', 'gs')).read().strip().split('\n')))
-
-			score = pearsonr(y, y_hat)[0]
-			scores.append(score)
-
-			print(fn, "\t", score)
-
-		print(td, np.mean(scores), "\n")
-
-
-def test_STS_benchmark(model):
-	"""
-	Test the performance on the STS benchmark (train and test) and print out the results.
-	Expected results:
-		STSBenchmark/sts-dev.csv 	 0.842
-		STSBenchmark/sts-test.csv 	 0.795
-	Args:
-		model: a uSIF object
-	"""
-	test_fns = [ 'STSBenchmark/sts-dev.csv', 'STSBenchmark/sts-test.csv' ]
-
-	for fn in test_fns:
-		y, y_hat = [], []
-		sentences = []
-
-		for line in open(fn):
-			similarity, s1, s2 = line.strip().split('\t')[-3:]
-			sentences.append(s1)
-			sentences.append(s2)
-			y.append(float(similarity))
-
-		vectors = model.embed(sentences)
-		y_hat = [ 1 - cosine(vectors[i], vectors[i+1]) for i in range(0, len(vectors), 2) ]
-
-		score = pearsonr(y, y_hat)[0]
-		print(fn, "\t", score)
-
 
 def get_paranmt_usif():
 	"""Return a uSIF embedding model that used pre-trained ParaNMT word vectors."""

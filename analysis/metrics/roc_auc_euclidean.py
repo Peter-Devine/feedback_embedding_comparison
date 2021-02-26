@@ -34,6 +34,6 @@ class Metric:
             else:
                 return metrics.roc_auc_score(sim, dis)
 
-        rocs = [calculate_rocauc(sim, dis, i) for i, (sim, dis) in enumerate(zip(self.similarities, -mutual_distances))]
+        rocs = [calculate_rocauc(sim, dis) for sim, dis in zip(self.similarities, -mutual_distances)]
 
         return sum(rocs) / len(rocs)

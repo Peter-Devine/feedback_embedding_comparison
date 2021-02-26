@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import importlib
 import numpy as np
-
+import logging
 
 def get_metrics(list_of_metrics, list_of_encodings=[]):
 
@@ -66,9 +66,12 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
             assert metric_df.shape[0] == 1, f"metric_df at {encoding_metric_path} should only have 1 row, and have metrics as columns (I.e. of shape (1, n_metrics)). Instead, df is of shape {metric_df.shape}"
 
             for metric in list_of_metrics:
-                assert metric in metric_df.columns, f"{metric} given to calculate, but {metric_df.columns} metrics exist in the results file."
+                if metric in metric_df.columns:
+                    metric_val = metric_df[metric].iloc[0]
+                else:
+                    logging.warning(f"{metric} given to calculate, but {metric_df.columns} metrics exist in the results file.")
+                    metric_val = None
 
-                metric_val = metric_df[metric].iloc[0]
                 results_dict[metric][dataset_encodings_folder][encoding_file[:-4]] = metric_val
 
     RESULTS_DIR = os.path.join(".", "results")

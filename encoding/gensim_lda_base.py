@@ -4,14 +4,18 @@ from gensim.models.ldamodel import LdaModel
 import numpy as np
 import nltk
 nltk.download('punkt')
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import string
 
 class GensimLdaBase:
     def __init__(self, topic_num):
         self.topic_num = topic_num
+        self.stopwords = set(stopwords.words('english') + list(string.punctuation))
 
     def encode(self, text_list, dataset_name=None):
         # Create a corpus from a list of texts
-        toks_list = [nltk.word_tokenize(x) for x in text_list]
+        toks_list = [self.tokenize_clean(x) for x in text_list]
         common_dictionary = Dictionary(toks_list)
         common_corpus = [common_dictionary.doc2bow(toks) for toks in toks_list]
 
@@ -32,3 +36,7 @@ class GensimLdaBase:
             topic_vector[i] = val
 
         return topic_vector
+
+
+    def tokenize_clean(self, sentence):
+        return [i for i in nltk.word_tokenize(sentence.lower()) if i not in self.stopwords]

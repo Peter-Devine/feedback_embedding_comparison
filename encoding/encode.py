@@ -14,6 +14,11 @@ def get_encodings(list_of_encoders):
         encoders_file_list = os.listdir(encoders_dir)
         list_of_encoders = [file_name[:-3] for file_name in encoders_file_list if file_name[-3:] == ".py"]
 
+        # Make sure that all the encoders that rely on concatenation come at the end
+        list_of_encoders_non_concat = [enc_name for enc_name in list_of_encoders if "concat" not in enc_name]
+        list_of_encoders_concat = [enc_name for enc_name in list_of_encoders if "concat" in enc_name]
+        list_of_encoders = list_of_encoders_non_concat + list_of_encoders_concat
+
     # Get the raw data to encode in a {"dataset_name": dataset_df}
     def get_dataset_dict():
         data_folder_dir = os.path.join(".", "data", "raw")

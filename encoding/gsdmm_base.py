@@ -2,14 +2,19 @@ from gsdmm import MovieGroupProcess
 import numpy as np
 import nltk
 nltk.download('punkt')
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import string
 
 class GsdmmBase:
     def __init__(self, topic_num):
         self.topic_num = topic_num
+        self.stopwords = set(stopwords.words('english') + list(string.punctuation))
 
     def encode(self, text_list, dataset_name=None):
+
         # Get a list of a set of tokens, tokenized by nltk
-        list_of_word_sets = [set(nltk.word_tokenize(x)) for x in text_list]
+        list_of_word_sets = [set(self.tokenize_clean(x)) for x in text_list]
 
         # Make the vocab set, as a set of all words occuring in the data
         vocab = set()
@@ -24,3 +29,6 @@ class GsdmmBase:
         embeddings = np.stack(embeddings)
 
         return embeddings
+
+    def tokenize_clean(self, sentence):
+        return [i for i in nltk.word_tokenize(sentence.lower()) if i not in self.stopwords]
