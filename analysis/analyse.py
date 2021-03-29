@@ -109,7 +109,6 @@ def calculate_metrics_of_encoding(encodings, labels, metric_objects_dict):
     metrics_dict = {}
 
     for metric_name, metric_obj in metric_objects_dict.items():
-        metric_val = metric_obj.calculate(encodings)
-        metrics_dict[metric_name] = metric_val
+        metrics_dict.update(metric_obj.calculate(encodings))
 
     return metrics_dict
