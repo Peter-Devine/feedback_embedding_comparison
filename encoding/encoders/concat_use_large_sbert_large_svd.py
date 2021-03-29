@@ -13,7 +13,7 @@ class Encoder:
         use_dir = os.path.join(".", "data", "encoding", dataset_name, "use_large.npy")
         use_embedding = self.load_embedding(use_dir)
 
-        sbert_dir = os.path.join(".", "data", "encoding", dataset_name, "bert_large_nli_mean_tokens.npy")
+        sbert_dir = os.path.join(".", "data", "encoding", dataset_name, "nli_bert_large.npy")
         sbert_embedding = self.load_embedding(sbert_dir)
 
         use_embedding = self.normalize(use_embedding)
