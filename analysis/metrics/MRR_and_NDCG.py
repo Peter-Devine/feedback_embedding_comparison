@@ -23,7 +23,7 @@ class Metric:
 
         for distance_metric in distance_metrics:
             # Get the distances between each embedding
-            mutual_distances = spatial.distance.squareform(spatial.distance.pdist(embeddings, metric=self.distance_metric))
+            mutual_distances = spatial.distance.squareform(spatial.distance.pdist(embeddings, metric=distance_metric))
 
             # Make the nan and inf values (which only appear in cosine and JS distances) 2, higher than the maximum for these metrics
             mutual_distances[np.isnan(mutual_distances) | np.isinf(mutual_distances)] = 2
