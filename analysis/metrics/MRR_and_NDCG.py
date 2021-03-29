@@ -36,7 +36,7 @@ class Metric:
 
             results_dict.update({f"{distance_metric}_mrr": mrr, f"{distance_metric}_ndcg": ndcg})
 
-        return ndcg
+        return results_dict
 
     def __calculate_metric(self, metric_fn, pos_neg_vector, distances):
         # If this point is similar to all points (I.e. shares a label with every other piece of feedback) then we just return 1, as anything you return will be appropriate
