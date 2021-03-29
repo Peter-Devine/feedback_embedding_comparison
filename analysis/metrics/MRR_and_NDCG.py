@@ -28,8 +28,8 @@ class Metric:
             # Make the nan and inf values (which only appear in cosine and JS distances) 2, higher than the maximum for these metrics
             mutual_distances[np.isnan(mutual_distances) | np.isinf(mutual_distances)] = 2
 
-            list_of_rr = [self.__calculate_metric(self.mrr, sim, dis) for sim, dis in zip(self.similarities, mutual_distances)]
-            list_of_ndcg = [self.__calculate_metric(self.ndcg, sim, dis) for sim, dis in zip(self.similarities, mutual_distances)]
+            list_of_rr = [self.__calculate_metric(self.mrr, sim, dis, i) for i, (sim, dis) in enumerate(zip(self.similarities, mutual_distances))]
+            list_of_ndcg = [self.__calculate_metric(self.ndcg, sim, dis, i) for i, (sim, dis) in enumerate(zip(self.similarities, mutual_distances))]
 
             mrr = statistics.mean(list_of_rr)
             ndcg = statistics.mean(list_of_ndcg)
@@ -38,10 +38,14 @@ class Metric:
 
         return results_dict
 
-    def __calculate_metric(self, metric_fn, pos_neg_vector, distances):
+    def __calculate_metric(self, metric_fn, pos_neg_vector, distances, idx):
         # If this point is similar to all points (I.e. shares a label with every other piece of feedback) then we just return 1, as anything you return will be appropriate
         if pos_neg_vector.all():
             return 1
         else:
-            sorted_args = np.argsort(distances)
-            return metric_fn.compute(pos_neg_vector, sorted_args)
+            # Remove the point itself from the comparison
+            dis = np.delete(distances, idx)
+            p_n_vec = np.delete(pos_neg_vector, idx)
+            
+            sorted_args = np.argsort(dis)
+            return metric_fn.compute(p_n_vec, sorted_args)
