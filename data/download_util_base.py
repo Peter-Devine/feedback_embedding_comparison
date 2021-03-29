@@ -29,7 +29,7 @@ class DownloadUtilBase:
             df = pd.DataFrame({"text": grouped_df.index, "labels": grouped_df.values})
             df["labels"] = df["labels"].apply(lambda x: list(set(x)))
 
-            similarity_scores = labels.apply(lambda outer_list: labels.apply(lambda inner_list: not set(outer_list).isdisjoint(set(inner_list)))).values
+            similarity_scores = df["labels"].apply(lambda outer_list: df["labels"].apply(lambda inner_list: not set(outer_list).isdisjoint(set(inner_list)))).values
 
             # If all rows within the dataset have at least one common label, then we skip, as they will all be similar to each other.
             if similarity_scores.all():
