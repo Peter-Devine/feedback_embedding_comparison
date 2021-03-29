@@ -21,7 +21,7 @@ class GsdmmBase:
         [vocab.update(x) for x in list_of_word_sets]
 
         # Do the topic modelling
-        mgp = MovieGroupProcess(K=self.topic_num, alpha=0.1, beta=0.1, n_iters=50)
+        mgp = MovieGroupProcess(K=self.topic_num, alpha=0.1, beta=0.1, n_iters=30)
         mgp.fit(list_of_word_sets, len(vocab))
 
         # Score each document, getting a probability distribution over all topics
