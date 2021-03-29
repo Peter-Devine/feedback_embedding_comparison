@@ -44,4 +44,4 @@ class Metric:
             return 1
         else:
             sorted_args = np.argsort(distances)
-            return metric_fn.calculate(pos_neg_vector, sorted_args)
+            return metric_fn.compute(pos_neg_vector, sorted_args)
