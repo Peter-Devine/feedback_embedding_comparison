@@ -1,6 +1,7 @@
 import tensorflow_hub as hub
 import tensorflow_text
 import numpy as np
+import tqdm as tq
 
 class TfHubEncoderBase:
     def __init__(self, model_url):
