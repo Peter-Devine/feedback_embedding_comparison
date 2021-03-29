@@ -6,7 +6,7 @@ import statistics
 
 from cornac.metrics import NDCG, MRR
 
-class MrrNdcgMetric:
+class Metric:
 
     # Because the labels are the same across encodings, we calculate the label similarity only once
     def __init__(self, labels):
