@@ -39,7 +39,8 @@ class Metric:
         return ndcg
 
     def __calculate_metric(self, metric_fn, pos_neg_vector, distances):
-        if sim.all():
+        # If this point is similar to all points (I.e. shares a label with every other piece of feedback) then we just return 1, as anything you return will be appropriate
+        if pos_neg_vector.all():
             return 1
         else:
             sorted_args = np.argsort(distances)
