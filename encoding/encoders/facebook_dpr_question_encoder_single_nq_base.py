@@ -2,5 +2,5 @@ from encoding.sentence_transformers_encoder_base import SentenceTransformerEncod
 
 class Encoder(SentenceTransformerEncoderBase):
     def __init__(self):
-        model_name = "facebook-dpr-ctx_encoder-single-nq-base"
+        model_name = "facebook-dpr-question_encoder-single-nq-base"
         super(Encoder, self).__init__(model_name)
