@@ -28,8 +28,8 @@ class Metric:
             # Make the nan and inf values (which only appear in cosine and JS distances) 2, higher than the maximum for these metrics
             mutual_distances[np.isnan(mutual_distances) | np.isinf(mutual_distances)] = 2
 
-            list_of_rr = [self.__calculate_metric(self.mrr, sim, dis) for sim, dis in zip(self.similarities, -mutual_distances)]
-            list_of_ndcg = [self.__calculate_metric(self.ndcg, sim, dis) for sim, dis in zip(self.similarities, -mutual_distances)]
+            list_of_rr = [self.__calculate_metric(self.mrr, sim, dis) for sim, dis in zip(self.similarities, mutual_distances)]
+            list_of_ndcg = [self.__calculate_metric(self.ndcg, sim, dis) for sim, dis in zip(self.similarities, mutual_distances)]
 
             mrr = statistics.mean(list_of_rr)
             ndcg = statistics.mean(list_of_ndcg)
