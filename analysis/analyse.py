@@ -44,7 +44,9 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
             print(f"Calculating metrics on {encoding_file} encoding of {dataset_encodings_folder}")
             metrics_dict = calculate_metrics_of_encoding(encodings, labels, metric_objects_dict)
 
-            pd.DataFrame(metrics_dict, index=[0]).to_csv(os.path.join(individual_results_dir, dataset_encodings_folder, encoding_file))
+            encoding_file_csv_name = encoding_file.replace(".npy", ".csv")
+
+            pd.DataFrame(metrics_dict, index=[0]).to_csv(os.path.join(individual_results_dir, dataset_encodings_folder, encoding_file_csv_name))
 
 
     results_dict = {}
