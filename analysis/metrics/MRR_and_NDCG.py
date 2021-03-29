@@ -30,6 +30,8 @@ class Metric:
 
             list_of_rr = [self.__calculate_metric(self.mrr, sim, dis, i) for i, (sim, dis) in enumerate(zip(self.similarities, mutual_distances))]
             list_of_ndcg = [self.__calculate_metric(self.ndcg, sim, dis, i) for i, (sim, dis) in enumerate(zip(self.similarities, mutual_distances))]
+            list_of_rr = [x for x in list_of_rr if x is not None]
+            list_of_ndcg = [x for x in list_of_ndcg if x is not None]
 
             mrr = statistics.mean(list_of_rr)
             ndcg = statistics.mean(list_of_ndcg)
@@ -39,13 +41,14 @@ class Metric:
         return results_dict
 
     def __calculate_metric(self, metric_fn, pos_neg_vector, distances, idx):
-        # If this point is similar to all points (I.e. shares a label with every other piece of feedback) then we just return 1, as anything you return will be appropriate
-        if pos_neg_vector.all():
-            return 1
+        # Remove the point itself from the comparison
+        dis = np.delete(distances, idx)
+        p_n_vec = np.delete(pos_neg_vector, idx)
+
+        # If all points are the same, or none are, then rankings of other feedback is meaningless.
+        # Thus we return None, and exclude these points from the calculation.
+        if p_n_vec.all() or not p_n_vec.any():
+            return None
         else:
-            # Remove the point itself from the comparison
-            dis = np.delete(distances, idx)
-            p_n_vec = np.delete(pos_neg_vector, idx)
-            
             sorted_args = np.argsort(dis)
             return metric_fn.compute(p_n_vec, sorted_args)
