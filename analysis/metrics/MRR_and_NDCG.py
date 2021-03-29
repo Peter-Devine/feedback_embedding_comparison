@@ -18,7 +18,7 @@ class Metric:
     # Finds the average ROC over all points based on distance, where a 1 is defined as another point with a label that overlaps with the orginal point.
     def calculate(self, embeddings):
 
-        distance_metrics = ["cosine", "euclidean", "jensenshannon"]
+        distance_metrics = ["cosine", "euclidean", "jensenshannon", "manhattan"]
         results_dict = {}
 
         for distance_metric in distance_metrics:
