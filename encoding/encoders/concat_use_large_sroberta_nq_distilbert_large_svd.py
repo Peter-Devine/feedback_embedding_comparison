@@ -13,7 +13,7 @@ class Encoder:
         use_dir = os.path.join(".", "data", "encoding", dataset_name, "use_large.npy")
         use_embedding = self.load_embedding(use_dir)
 
-        sbert_dir = os.path.join(".", "data", "encoding", dataset_name, "nli_bert_large.npy")
+        sbert_dir = os.path.join(".", "data", "encoding", dataset_name, "nli_roberta_large.npy")
         sbert_embedding = self.load_embedding(sbert_dir)
 
         nq_distilbert_dir = os.path.join(".", "data", "encoding", dataset_name, "nq_distilbert_base_v1.npy")
