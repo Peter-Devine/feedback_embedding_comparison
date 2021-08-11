@@ -51,37 +51,39 @@ def get_metrics(list_of_metrics, list_of_encodings=[]):
 
     results_dict = {}
 
-    # Make an empty dict for each metric name to save dataset > encoding in it
-    for metric_name in list_of_metrics:
-        results_dict[metric_name] = {}
-
     for dataset_encodings_folder in os.listdir(individual_results_dir):
-        for metric_name in list_of_metrics:
-            results_dict[metric_name][dataset_encodings_folder] = {}
-
         dataset_encodings_path = os.path.join(individual_results_dir, dataset_encodings_folder)
 
         for encoding_file in os.listdir(dataset_encodings_path):
+            encoding_name = encoding_file[:-4]
             encoding_metric_path = os.path.join(dataset_encodings_path, encoding_file)
             metric_df = pd.read_csv(encoding_metric_path, index_col=0)
 
             assert metric_df.shape[0] == 1, f"metric_df at {encoding_metric_path} should only have 1 row, and have metrics as columns (I.e. of shape (1, n_metrics)). Instead, df is of shape {metric_df.shape}"
 
-            for metric in list_of_metrics:
-                if metric in metric_df.columns:
-                    metric_val = metric_df[metric].iloc[0]
-                else:
-                    logging.warning(f"{metric} given to calculate, but {metric_df.columns} metrics exist in the results file.")
-                    metric_val = None
-
-                results_dict[metric][dataset_encodings_folder][encoding_file[:-4]] = metric_val
-
+            for metric in metric_df.columns:
+                metric_val = metric_df[metric].iloc[0]
+                
+                results_dict = create_nested_dict(results_dict, [metric, dataset_encodings_folder, encoding_name])
+                results_dict[metric][dataset_encodings_folder][encoding_name] = metric_val
+    
     RESULTS_DIR = os.path.join(".", "results")
     os.makedirs(RESULTS_DIR, exist_ok = True)
     for metric_name, metric_results_dict in results_dict.items():
         results_dir = os.path.join(RESULTS_DIR, f"{metric_name}.csv")
         pd.DataFrame(metric_results_dict).to_csv(results_dir)
 
+def create_nested_dict(dictionary, nested_key_list):
+    key = nested_key_list[0]
+    
+    if key not in dictionary.keys():
+        dictionary[key] = {}
+            
+    if len(nested_key_list) > 1:
+        create_nested_dict(dictionary[key], nested_key_list[1:])
+        
+    return dictionary
+        
 def get_labels(encoding_path):
     with open(encoding_path, 'rb') as f:
         encoding_and_labels = np.load(f, allow_pickle=True)
